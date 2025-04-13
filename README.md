@@ -1,13 +1,13 @@
 
-# Smart City IoT Streaming Platform  
+# Smart City IoT Streaming Pipeline  
 
 ## Description  
-**Smart City IoT Streaming Platform** est une plateforme de traitement de données en temps réel simulant une ville intelligente. Elle ingère, traite et stocke les données provenant de capteurs de véhicules, de caméras de circulation, de conditions météorologiques et d'incidents d'urgence à l’aide des outils Big Data suivants :  
-- **Apache Kafka** pour l’ingestion de données  
+**Smart City IoT Streaming Pipeline** est un pipeline de traitement de données en temps réel simulant une ville intelligente. Il permet de générer, ingérer, traiter et stocker des flux de données provenant de capteurs IoT simulés liés aux véhicules, au trafic routier, aux conditions météorologiques et aux incidents d’urgence. Le projet utilise les technologies Big Data suivantes :  
+- **Apache Kafka** pour l’ingestion des flux de données  
 - **Apache Spark Structured Streaming** pour le traitement en continu  
-- **Apache Cassandra** pour le stockage des données  
+- **Apache Cassandra** pour le stockage des résultats  
 - **Docker** pour l’orchestration des services  
-- **PySpark** et **Python** pour le développement  
+- **PySpark** et **Python** pour le développement des producteurs et traitements  
 
 ## Architecture  
 
@@ -48,5 +48,3 @@ docker exec -it spark-master spark-submit \
   --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.2,com.datastax.spark:spark-cassandra-connector_2.12:3.3.0,com.github.jnr:jnr-posix:3.1.15 \
   /opt/bitnami/spark/jobs/smartcity.py
 ```
-
-
