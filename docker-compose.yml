@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+  zookeeper:
+    image: bitnami/zookeeper:3.8
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    networks:
+      - datamasterylab
+
+  kafka:
+    image: bitnami/kafka:3.5.1
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+    depends_on:
+      - zookeeper
+    networks:
+      - datamasterylab
+
+  kafka-producer:
+    image: kafka-producer
+    depends_on:
+      - kafka
+    environment:
+      - KAFKA_SERVER=kafka:9092
+      - ZOOKEEPER_SERVER=zookeeper:2181
+      - PRODUCER_INTERVAL=100
+    networks:
+      - datamasterylab
+
+
+  spark:
+    image: bitnami/spark:3.3.2
+    container_name: spark-master
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    environment:
+      - SPARK_MODE=master
+      - SPARK_MASTER_HOST=spark-master
+    volumes:
+      - ./jobs:/opt/bitnami/spark/jobs 
+    depends_on:
+      - kafka
+    networks:
+      - datamasterylab
+
+  spark-worker-1:
+    image: bitnami/spark:3.3.2
+    container_name: spark-worker-1
+    volumes:
+      - ./jobs:/opt/bitnami/spark/jobs
+    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    environment:
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=1g
+    depends_on:
+      - spark
+    networks:
+      - datamasterylab
+
+  spark-worker-2:
+    image: bitnami/spark:3.3.2
+    container_name: spark-worker-2
+    volumes:
+      - ./jobs:/opt/bitnami/spark/jobs
+    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    environment:
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=1g
+    depends_on:
+      - spark
+    networks:
+      - datamasterylab
+
+  cassandra:
+    image: cassandra:4.0
+    container_name: cassandra
+    ports:
+      - "9042:9042"
+    environment:
+      - CASSANDRA_CLUSTER_NAME=datamasterylab
+      - CASSANDRA_LISTENER_HINTS_ENABLED=false
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+    networks:
+      - datamasterylab
+
+volumes:
+  cassandra_data:
+
+networks:
+  datamasterylab:
